@@ -1,232 +1,478 @@
 
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TAEKOOK MOMENTS</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>TAEKOOK MOMENTS ♡</title>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#10090d;color:#f8eaf0;font-family:Arial,sans-serif}
-header{text-align:center;padding:25px 15px 15px}
-h1{font-size:25px;letter-spacing:3px;color:#e8b6c9}
-button,select{background:#642d45;color:white;border:1px solid #a75c79;border-radius:10px;padding:11px;margin:5px;font-size:14px}
-button:active{opacity:.7}
-#menu{display:grid;grid-template-columns:1fr 1fr;gap:13px;padding:15px}
-.tile{height:115px;border:1px solid #653247;border-radius:15px;background:linear-gradient(145deg,#351725,#170d13);display:flex;align-items:center;justify-content:center;text-align:center;font-size:17px;color:#f4d9e4}
-.page{display:none;padding:15px}
-.page.active{display:block}
-.back{margin:8px 0 18px}
-.years{display:grid;grid-template-columns:1fr;gap:9px}
-.year{background:#29131e;border:1px solid #653247;padding:16px;border-radius:10px;text-align:center}
-.photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.photo{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;background:#24151c}
-#viewer{display:none;position:fixed;inset:0;background:#080508;z-index:10;align-items:center;justify-content:center;flex-direction:column;padding:12px}
-#viewer img{max-width:100%;max-height:78vh;object-fit:contain}
-#viewer button{margin-top:12px}
-#admin{display:none;background:#26121c;padding:13px;border-radius:12px;margin:12px 0}
-#status{color:#d9aabd;text-align:center;font-size:13px;padding:10px}
-input[type=file]{max-width:100%;margin:10px 0}
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #10090d;
+  color: #f8edf1;
+  font-family: Georgia, serif;
+}
+
+header {
+  text-align: center;
+  padding: 35px 18px 25px;
+  background: linear-gradient(145deg, #35101f, #160b12);
+  border-bottom: 1px solid #59283b;
+}
+
+h1 {
+  font-size: 27px;
+  letter-spacing: 3px;
+  margin: 10px 0;
+}
+
+.subtitle {
+  color: #c69aaa;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.language {
+  margin-top: 18px;
+  background: transparent;
+  border: 1px solid #a45b78;
+  color: #f8edf1;
+  border-radius: 20px;
+  padding: 8px 17px;
+}
+
+main {
+  max-width: 620px;
+  margin: auto;
+  padding: 25px 18px 55px;
+}
+
+h2 {
+  color: #e8b9cb;
+  font-size: 21px;
+  letter-spacing: 2px;
+  margin: 8px 0 20px;
+}
+
+.intro {
+  color: #bda5af;
+  line-height: 1.7;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* MAIN MENU */
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.menu-card {
+  min-height: 125px;
+  background: linear-gradient(145deg, #351a28, #1c1017);
+  border: 1px solid #704057;
+  border-radius: 14px;
+  color: #f5e5eb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: Georgia, serif;
+  font-size: 15px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.menu-card:active {
+  background: #71364e;
+  transform: scale(0.97);
+}
+
+.menu-icon { font-size: 27px; }
+
+/* ARCHIVE */
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #21121a;
+  border: 1px solid #51283a;
+  border-radius: 10px;
+  padding: 17px;
+  margin: 9px 0;
+  color: #f5e5eb;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.item small {
+  color: #b68b9d;
+  font-size: 11px;
+}
+
+.arrow { color: #c58aa1; }
+
+.back {
+  background: transparent;
+  border: 0;
+  color: #d9a9bb;
+  padding: 8px 0 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.empty {
+  text-align: center;
+  padding: 38px 18px;
+  border: 1px dashed #63364a;
+  border-radius: 12px;
+  color: #bda5af;
+  line-height: 1.8;
+}
+
+/* PHOTO GALLERY */
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.photo-card {
+  border: 1px solid #704057;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #21121a;
+  padding: 0;
+  cursor: pointer;
+}
+
+.photo-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.photo-name {
+  display: block;
+  padding: 10px;
+  color: #e8b9cb;
+  font-size: 12px;
+}
+
+/* PHOTO VIEWER */
+
+.viewer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(10, 5, 8, 0.97);
+  padding: 55px 15px 25px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.viewer.active { display: flex; }
+
+.viewer img {
+  max-width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.close-viewer {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  background: transparent;
+  border: 1px solid #a45b78;
+  color: white;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 23px;
+  cursor: pointer;
+}
+
+.save-photo {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 25px;
+  border-radius: 25px;
+  border: 1px solid #a45b78;
+  background: #51283a;
+  color: white;
+  text-decoration: none;
+  font-family: Georgia, serif;
+  font-size: 14px;
+}
+
+footer {
+  text-align: center;
+  color: #80596a;
+  font-size: 11px;
+  padding: 20px;
+}
 </style>
 </head>
+
 <body>
+
 <header>
-<h1>TAEKOOK MOMENTS ♡</h1>
-<button onclick="setLang('ru')">RU</button>
-<button onclick="setLang('en')">EN</button>
+  <div class="subtitle">A LITTLE ARCHIVE OF</div>
+  <h1>TAEKOOK MOMENTS ♡</h1>
+  <div class="subtitle">MEMORIES · PHOTOS · MOMENTS</div>
+  <button class="language" id="languageButton">РУССКИЙ</button>
 </header>
 
-<div id="menu">
-<div class="tile" onclick="openPage('photos')">📷<br>Photos</div>
-<div class="tile" onclick="openPage('videos')">🎬<br>Videos</div>
-<div class="tile" onclick="openPage('moments')">♡<br>Moments</div>
-<div class="tile" onclick="openPage('timeline')">⌛<br>Timeline</div>
-<div class="tile" onclick="openPage('edits')">✦<br>Edits</div>
-<div class="tile" onclick="openPage('news')">✧<br>News</div>
-<div class="tile" onclick="openPage('favorites')">♡<br>Favorites</div>
-<div class="tile" onclick="openPage('about')">☾<br>About</div>
-</div>
+<main id="content"></main>
 
-<section id="photos" class="page">
-<button class="back" onclick="home()">← Главная</button>
-<h2>Photos</h2>
-<button onclick="showAlbum('latest')">Latest updates</button>
-<h3>Archive</h3>
-<div id="years" class="years"></div>
-<div id="admin">
-<h3>＋ Добавить фото</h3>
-<input type="file" id="file" accept="image/*">
-<br>
-<select id="album">
-<option value="latest">Latest updates</option>
-</select>
-<br>
-<button onclick="uploadPhoto()">Загрузить</button>
-</div>
-<div id="gallery" class="photos"></div>
-</section>
+<footer>MADE WITH LOVE ♡ TAEKOOK MOMENTS</footer>
 
-<div id="other" class="page">
-<button class="back" onclick="home()">← Главная</button>
-<h2 id="otherTitle"></h2>
-<p>Раздел скоро появится ♡</p>
-</div>
+<!-- PHOTO VIEWER -->
 
-<div id="viewer">
-<img id="largePhoto">
-<button onclick="savePhoto()">Сохранить фото</button>
-<button onclick="closeViewer()">Закрыть</button>
+<div class="viewer" id="viewer">
+  <button class="close-viewer" onclick="closePhoto()">×</button>
+  <img id="viewerImage" src="" alt="Taekook photo">
+  <a id="saveButton" class="save-photo" href="" download>
+    ♡ Save photo
+  </a>
 </div>
-<div id="status"></div>
 
 <script>
-const SUPABASE_URL="https://oncimzmujksicnseqmzz.supabase.co";
-const SUPABASE_KEY="sb_publishable_2Oh_uQynPaTGJ-Ob4yiOhw_VPmNNc--";
-const FUNCTION_URL=SUPABASE_URL+"/functions/v1/taekook-admin";
-const tg=window.Telegram?.WebApp;
-tg?.ready();
-tg?.expand();
 
-let currentAlbum="latest";
-let currentPhoto="";
-let photos=[];
+const sections = [
+  {id:"photos", en:"Photos", ru:"Фото", icon:"📸"},
+  {id:"videos", en:"Videos", ru:"Видео", icon:"🎬"},
+  {id:"moments", en:"Moments", ru:"Моменты", icon:"♡"},
+  {id:"timeline", en:"Timeline", ru:"Хронология", icon:"⌛"},
+  {id:"edits", en:"Edits", ru:"Эдиты", icon:"✦"},
+  {id:"news", en:"News", ru:"Новости", icon:"📰"},
+  {id:"favorites", en:"Favorites", ru:"Избранное", icon:"♡"},
+  {id:"about", en:"About", ru:"О проекте", icon:"☾"}
+];
 
-const years=Array.from({length:14},(_,i)=>2026-i);
+const years = [];
+for (let y = 2026; y >= 2013; y--) years.push(y);
 
-async function api(action,extra={},file=null){
-const headers={
-"apikey":SUPABASE_KEY,
-"Authorization":"Bearer "+SUPABASE_KEY
+const photos = [
+  {
+    src: "photos/image.png",
+    name: "TAEKOOK MOMENT"
+  }
+];
+
+let language = "en";
+let currentSection = "home";
+let currentYear = null;
+let currentView = "home";
+
+const content = document.getElementById("content");
+const languageButton = document.getElementById("languageButton");
+
+function t(en, ru) {
+  return language === "en" ? en : ru;
+}
+
+function showHome() {
+  currentSection = "home";
+  currentView = "home";
+  currentYear = null;
+
+  content.innerHTML = `
+    <h2 style="text-align:center">
+      ♡ ${t("WELCOME","ДОБРО ПОЖАЛОВАТЬ")} ♡
+    </h2>
+    <p class="intro">
+      ${t(
+        "A little place for memories, photos and special moments.",
+        "Место для фотографий, воспоминаний и особенных моментов."
+      )}
+    </p>
+    <div class="menu-grid" id="menuGrid"></div>
+  `;
+
+  const grid = document.getElementById("menuGrid");
+
+  sections.forEach(section => {
+    const button = document.createElement("button");
+    button.className = "menu-card";
+    button.innerHTML = `
+      <span class="menu-icon">${section.icon}</span>
+      <span>${t(section.en, section.ru)}</span>
+    `;
+    button.onclick = () => openSection(section.id);
+    grid.appendChild(button);
+  });
+}
+
+function openSection(id) {
+  currentSection = id;
+  currentView = "section";
+  currentYear = null;
+
+  if (id === "photos") {
+    renderPhotos();
+    return;
+  }
+
+  const section = sections.find(s => s.id === id);
+
+  content.innerHTML = `
+    <button class="back" onclick="showHome()">
+      ← ${t("Main menu","Главное меню")}
+    </button>
+    <h2>♡ ${t(section.en, section.ru).toUpperCase()}</h2>
+    <div class="empty">
+      ♡<br>
+      ${t(
+        "This section is waiting for content.",
+        "Этот раздел ждёт наполнения."
+      )}
+    </div>
+  `;
+}
+
+function renderPhotos() {
+  currentSection = "photos";
+  currentView = "photos";
+
+  if (currentYear !== null) {
+    content.innerHTML = `
+      <button class="back" onclick="currentYear=null;renderPhotos()">
+        ← ${t("Back to Photos","Назад к фотографиям")}
+      </button>
+      <h2>♡ ${currentYear}</h2>
+      <div class="empty">
+        ♡<br>
+        ${t(
+          "This album is waiting for photos.",
+          "Этот альбом ждёт фотографии."
+        )}
+      </div>
+    `;
+    return;
+  }
+
+  content.innerHTML = `
+    <button class="back" onclick="showHome()">
+      ← ${t("Main menu","Главное меню")}
+    </button>
+
+    <h2>♡ ${t("PHOTOS","ФОТОГРАФИИ")}</h2>
+
+    <button class="item" onclick="showLatest()">
+      <span>
+        <strong>Latest updates</strong><br>
+        <small>${t(
+          "The newest photos first",
+          "Сначала самые новые фотографии"
+        )}</small>
+      </span>
+      <span class="arrow">›</span>
+    </button>
+
+    <h2 style="margin-top:30px">${t("ARCHIVE","АРХИВ")}</h2>
+    <div id="yearList"></div>
+  `;
+
+  const yearList = document.getElementById("yearList");
+
+  years.forEach(year => {
+    const button = document.createElement("button");
+    button.className = "item";
+    button.innerHTML = `
+      <strong>${year}</strong>
+      <span class="arrow">›</span>
+    `;
+    button.onclick = () => {
+      currentYear = year;
+      renderPhotos();
+    };
+    yearList.appendChild(button);
+  });
+}
+
+function showLatest() {
+  currentSection = "photos";
+  currentView = "latest";
+
+  content.innerHTML = `
+    <button class="back" onclick="renderPhotos()">
+      ← ${t("Back to Photos","Назад к фотографиям")}
+    </button>
+
+    <h2>♡ ${t("LATEST UPDATES","НОВЫЕ ФОТО")}</h2>
+    <div class="photo-grid" id="photoGrid"></div>
+  `;
+
+  const grid = document.getElementById("photoGrid");
+
+  photos.forEach(photo => {
+    const button = document.createElement("button");
+    button.className = "photo-card";
+
+    const img = document.createElement("img");
+    img.src = photo.src;
+    img.alt = photo.name;
+
+    const name = document.createElement("span");
+    name.className = "photo-name";
+    name.textContent = photo.name;
+
+    button.appendChild(img);
+    button.appendChild(name);
+    button.onclick = () => openPhoto(photo.src);
+
+    grid.appendChild(button);
+  });
+}
+
+function openPhoto(src) {
+  const viewer = document.getElementById("viewer");
+  const image = document.getElementById("viewerImage");
+  const save = document.getElementById("saveButton");
+
+  image.src = src;
+  save.href = src;
+  viewer.classList.add("active");
+}
+
+function closePhoto() {
+  document.getElementById("viewer").classList.remove("active");
+}
+
+document.getElementById("viewer").addEventListener("click", function(event) {
+  if (event.target === this) closePhoto();
+});
+
+languageButton.onclick = () => {
+  language = language === "en" ? "ru" : "en";
+  languageButton.textContent = t("РУССКИЙ","ENGLISH");
+
+  if (currentView === "home") showHome();
+  else if (currentView === "latest") showLatest();
+  else if (currentSection === "photos") renderPhotos();
+  else openSection(currentSection);
 };
-if(tg?.initData)headers["x-telegram-init-data"]=tg.initData;
 
-let response;
-if(file){
-const form=new FormData();
-form.append("action",action);
-Object.entries(extra).forEach(([k,v])=>form.append(k,v));
-form.append("file",file);
-response=await fetch(FUNCTION_URL,{method:"POST",headers,body:form});
-}else{
-headers["Content-Type"]="application/json";
-response=await fetch(FUNCTION_URL,{
-method:"POST",headers,
-body:JSON.stringify({action,...extra})
-});
-}
-const data=await response.json();
-if(!response.ok)throw new Error(data.error||data.message||"Ошибка сервера");
-return data;
-}
+showHome();
 
-function home(){
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-document.getElementById("menu").style.display="grid";
-document.getElementById("status").textContent="";
-}
-function openPage(name){
-document.getElementById("menu").style.display="none";
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-if(name==="photos"){
-document.getElementById("photos").classList.add("active");
-}else{
-document.getElementById("other").classList.add("active");
-document.getElementById("otherTitle").textContent=name.toUpperCase();
-}
-}
-function setLang(lang){
-document.documentElement.lang=lang;
-}
-function makeYears(){
-const box=document.getElementById("years");
-const select=document.getElementById("album");
-years.forEach(y=>{
-const b=document.createElement("div");
-b.className="year";
-b.textContent=y;
-b.onclick=()=>showAlbum(String(y));
-box.appendChild(b);
-const option=document.createElement("option");
-option.value=String(y);
-option.textContent=y;
-select.appendChild(option);
-});
-}
-async function loadPhotos(){
-try{
-const data=await api("list");
-photos=data.photos||[];
-}catch(e){
-document.getElementById("status").textContent="Не удалось загрузить фотографии: "+e.message;
-}
-}
-async function showAlbum(album){
-currentAlbum=album;
-document.getElementById("gallery").innerHTML="";
-document.getElementById("status").textContent="Загрузка...";
-await loadPhotos();
-const found=photos.filter(p=>{
-const path=p.path||"";
-return album==="latest"?path.startsWith("latest/"):path.startsWith(album+"/");
-});
-const gallery=document.getElementById("gallery");
-found.forEach(p=>{
-const img=document.createElement("img");
-img.className="photo";
-img.src=p.url;
-img.onclick=()=>viewPhoto(p.url,p.path);
-gallery.appendChild(img);
-});
-document.getElementById("status").textContent=found.length?"":"В этом альбоме пока нет фотографий.";
-}
-function viewPhoto(url,path){
-currentPhoto=url;
-document.getElementById("largePhoto").src=url;
-document.getElementById("viewer").style.display="flex";
-document.getElementById("viewer").dataset.path=path;
-}
-function closeViewer(){
-document.getElementById("viewer").style.display="none";
-}
-async function savePhoto(){
-try{
-const response=await fetch(currentPhoto);
-const blob=await response.blob();
-const url=URL.createObjectURL(blob);
-const a=document.createElement("a");
-a.href=url;
-a.download="taekook-photo.jpg";
-a.click();
-URL.revokeObjectURL(url);
-}catch(e){
-window.open(currentPhoto,"_blank");
-}
-}
-async function uploadPhoto(){
-const file=document.getElementById("file").files[0];
-if(!file){alert("Сначала выбери фотографию");return}
-try{
-document.getElementById("status").textContent="Загружаю...";
-await api("upload",{album:document.getElementById("album").value},file);
-document.getElementById("file").value="";
-await showAlbum(document.getElementById("album").value);
-document.getElementById("status").textContent="Фото загружено ♡";
-}catch(e){
-document.getElementById("status").textContent="Ошибка: "+e.message;
-}
-}
-
-async function checkAdmin(){
-try{
-const result=await api("admin-check");
-if(result.admin===true)document.getElementById("admin").style.display="block";
-}catch(e){
-console.log("Admin check:",e.message);
-}
-}
-makeYears();
-checkAdmin();
 </script>
 </body>
 </html>
