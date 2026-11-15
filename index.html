@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TAEKOOK MOMENTS ♡</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
 * { box-sizing: border-box; }
@@ -156,6 +157,7 @@ h2 {
   background: #21121a;
   padding: 0;
   cursor: pointer;
+  position: relative;
 }
 
 .photo-card img {
@@ -165,11 +167,18 @@ h2 {
   object-fit: cover;
 }
 
-.photo-name {
-  display: block;
-  padding: 10px;
-  color: #e8b9cb;
-  font-size: 12px;
+.photo-delete {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  border: 1px solid #a45b78;
+  background: rgba(20, 5, 12, .9);
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  cursor: pointer;
 }
 
 /* PHOTO VIEWER */
@@ -222,11 +231,106 @@ h2 {
   font-size: 14px;
 }
 
+/* ADMIN */
+
+.admin-button {
+  display: none;
+  position: fixed;
+  right: 17px;
+  bottom: 20px;
+  z-index: 900;
+  width: 49px;
+  height: 49px;
+  border-radius: 50%;
+  border: 1px solid #a45b78;
+  background: #35101f;
+  color: white;
+  font-size: 23px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px #0008;
+}
+
+.admin-panel {
+  display: none;
+  background: #21121a;
+  border: 1px solid #704057;
+  border-radius: 13px;
+  padding: 16px;
+  margin: 18px 0;
+}
+
+.admin-panel h3 {
+  color: #e8b9cb;
+  margin-top: 0;
+  letter-spacing: 1px;
+}
+
+.admin-panel input,
+.admin-panel textarea,
+.admin-panel select {
+  width: 100%;
+  display: block;
+  margin: 9px 0;
+  padding: 12px;
+  background: #10090d;
+  border: 1px solid #704057;
+  border-radius: 8px;
+  color: #f8edf1;
+  font-family: Georgia, serif;
+  font-size: 14px;
+}
+
+.admin-panel textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.admin-action {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0;
+  border: 1px solid #a45b78;
+  border-radius: 9px;
+  background: #51283a;
+  color: white;
+  font-family: Georgia, serif;
+  cursor: pointer;
+}
+
+.admin-secondary {
+  background: transparent;
+}
+
+.admin-entry {
+  border: 1px solid #63364a;
+  border-radius: 10px;
+  padding: 13px;
+  margin: 10px 0;
+  background: #21121a;
+  line-height: 1.6;
+}
+
+.admin-entry p {
+  color: #c9aeb9;
+  white-space: pre-wrap;
+}
+
+.entry-link {
+  color: #e8b9cb;
+}
+
 footer {
   text-align: center;
   color: #80596a;
   font-size: 11px;
   padding: 20px;
+}
+
+.status {
+  color: #d9a9bb;
+  font-size: 13px;
+  text-align: center;
+  margin: 10px 0;
 }
 </style>
 </head>
@@ -244,7 +348,7 @@ footer {
 
 <footer>MADE WITH LOVE ♡ TAEKOOK MOMENTS</footer>
 
-<!-- PHOTO VIEWER -->
+<button class="admin-button" id="adminButton" onclick="toggleAdmin()">⚙</button>
 
 <div class="viewer" id="viewer">
   <button class="close-viewer" onclick="closePhoto()">×</button>
@@ -255,6 +359,44 @@ footer {
 </div>
 
 <script>
+/* CONNECTION */
+
+const SUPABASE_URL = "https://oncimzmujksicnseqmzz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_2Oh_uQynPaTGJ-Ob4yiOhw_VPmNNc--";
+const API_URL = SUPABASE_URL + "/functions/v1/taekook-admin";
+
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+function telegramHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "apikey": SUPABASE_KEY,
+    "Authorization": "Bearer " + SUPABASE_KEY,
+    "x-telegram-init-data": tg?.initData || ""
+  };
+}
+
+async function api(action, extra = {}) {
+  const result = await fetch(API_URL, {
+    method: "POST",
+    headers: telegramHeaders(),
+    body: JSON.stringify({ action, ...extra })
+  });
+
+  const data = await result.json();
+
+  if (!result.ok) {
+    throw new Error(data.error || "Request failed");
+  }
+
+  return data;
+}
+
+/* DATA */
 
 const sections = [
   {id:"photos", en:"Photos", ru:"Фото", icon:"📸"},
@@ -270,17 +412,13 @@ const sections = [
 const years = [];
 for (let y = 2026; y >= 2013; y--) years.push(y);
 
-const photos = [
-  {
-    src: "photos/image.png",
-    name: "TAEKOOK MOMENT"
-  }
-];
-
 let language = "en";
 let currentSection = "home";
 let currentYear = null;
 let currentView = "home";
+let isAdmin = false;
+let photos = [];
+let siteContent = {};
 
 const content = document.getElementById("content");
 const languageButton = document.getElementById("languageButton");
@@ -288,6 +426,67 @@ const languageButton = document.getElementById("languageButton");
 function t(en, ru) {
   return language === "en" ? en : ru;
 }
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
+}
+
+function safeLink(value) {
+  try {
+    const url = new URL(value);
+    return ["https:", "http:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
+function setStatus(message) {
+  const element = document.getElementById("statusMessage");
+  if (element) element.textContent = message;
+}
+
+/* INITIAL LOAD */
+
+async function initialize() {
+  try {
+    const check = await api("admin-check");
+    isAdmin = check.admin === true;
+
+    if (isAdmin) {
+      document.getElementById("adminButton").style.display = "block";
+    }
+  } catch (error) {
+    console.log("Admin check:", error.message);
+  }
+
+  try {
+    const result = await api("content-get");
+    siteContent = result.content || {};
+  } catch (error) {
+    console.log("Content loading:", error.message);
+  }
+
+  await loadPhotos();
+  showHome();
+}
+
+async function loadPhotos() {
+  try {
+    const result = await api("list");
+    photos = result.photos || [];
+  } catch (error) {
+    console.log("Photos loading:", error.message);
+    photos = [];
+  }
+}
+
+/* HOME */
 
 function showHome() {
   currentSection = "home";
@@ -321,6 +520,8 @@ function showHome() {
   });
 }
 
+/* SECTIONS */
+
 function openSection(id) {
   currentSection = id;
   currentView = "section";
@@ -331,41 +532,147 @@ function openSection(id) {
     return;
   }
 
+  renderTextSection(id);
+}
+
+function renderTextSection(id) {
+  currentSection = id;
+  currentView = "section";
+
   const section = sections.find(s => s.id === id);
+  const entries = Array.isArray(siteContent[id]) ? siteContent[id] : [];
 
   content.innerHTML = `
     <button class="back" onclick="showHome()">
       ← ${t("Main menu","Главное меню")}
     </button>
     <h2>♡ ${t(section.en, section.ru).toUpperCase()}</h2>
-    <div class="empty">
-      ♡<br>
-      ${t(
-        "This section is waiting for content.",
-        "Этот раздел ждёт наполнения."
-      )}
-    </div>
+    ${isAdmin ? `
+      <div class="admin-panel" id="entryEditor">
+        <h3>${t("ADD NEW ENTRY","ДОБАВИТЬ ЗАПИСЬ")}</h3>
+        <input id="entryTitle" placeholder="${t("Title","Название")}">
+        <textarea id="entryText" placeholder="${t("Text or description","Текст или описание")}"></textarea>
+        <input id="entryLink" placeholder="${t("Link (optional)","Ссылка (необязательно")}">
+        <button class="admin-action" onclick="saveEntry('${id}')">
+          ${t("＋ Add entry","＋ Добавить запись")}
+        </button>
+        <p class="status" id="statusMessage"></p>
+      </div>
+    ` : ""}
+    <div id="entriesList"></div>
   `;
+
+  const list = document.getElementById("entriesList");
+
+  if (!entries.length) {
+    list.innerHTML = `
+      <div class="empty">
+        ♡<br>
+        ${t("This section is waiting for content.","Этот раздел ждёт наполнения.")}
+      </div>
+    `;
+    return;
+  }
+
+  entries.forEach((entry, index) => {
+    const card = document.createElement("div");
+    card.className = "admin-entry";
+
+    const link = safeLink(entry.link);
+
+    card.innerHTML = `
+      <strong>${escapeHTML(entry.title)}</strong>
+      ${entry.text ? `<p>${escapeHTML(entry.text)}</p>` : ""}
+      ${link ? `<a class="entry-link" href="${escapeHTML(link)}" target="_blank" rel="noopener">${t("Open link","Открыть ссылку")} ↗</a>` : ""}
+      ${isAdmin ? `
+        <button class="admin-action admin-secondary" onclick="editEntry('${id}',${index})">
+          ✎ ${t("Edit","Изменить")}
+        </button>
+        <button class="admin-action admin-secondary" onclick="deleteEntry('${id}',${index})">
+          × ${t("Delete","Удалить")}
+        </button>
+      ` : ""}
+    `;
+
+    list.appendChild(card);
+  });
 }
+
+/* CONTENT EDITING */
+
+async function saveContent() {
+  try {
+    await api("content-save", { content: siteContent });
+    return true;
+  } catch (error) {
+    alert(t("Could not save: ","Не удалось сохранить: ") + error.message);
+    return false;
+  }
+}
+
+async function saveEntry(id) {
+  const title = document.getElementById("entryTitle").value.trim();
+  const text = document.getElementById("entryText").value.trim();
+  const link = document.getElementById("entryLink").value.trim();
+
+  if (!title && !text && !link) {
+    alert(t("Add some content first.","Сначала добавь содержимое."));
+    return;
+  }
+
+  if (link && !safeLink(link)) {
+    alert(t("Please enter a valid http or https link.","Введи корректную ссылку."));
+    return;
+  }
+
+  if (!Array.isArray(siteContent[id])) siteContent[id] = [];
+
+  siteContent[id].push({ title, text, link });
+
+  if (await saveContent()) {
+    renderTextSection(id);
+  }
+}
+
+async function editEntry(id, index) {
+  const entry = siteContent[id]?.[index];
+  if (!entry) return;
+
+  const title = prompt(t("Title:","Название:"), entry.title || "");
+  if (title === null) return;
+
+  const text = prompt(t("Text:","Текст:"), entry.text || "");
+  if (text === null) return;
+
+  const link = prompt(t("Link (optional):","Ссылка (необязательно):"), entry.link || "");
+  if (link === null) return;
+
+  if (link && !safeLink(link)) {
+    alert(t("Invalid link.","Некорректная ссылка."));
+    return;
+  }
+
+  siteContent[id][index] = { title, text, link };
+
+  if (await saveContent()) renderTextSection(id);
+}
+
+async function deleteEntry(id, index) {
+  if (!confirm(t("Delete this entry?","Удалить эту запись?"))) return;
+
+  siteContent[id].splice(index, 1);
+
+  if (await saveContent()) renderTextSection(id);
+}
+
+/* PHOTOS */
 
 function renderPhotos() {
   currentSection = "photos";
   currentView = "photos";
 
   if (currentYear !== null) {
-    content.innerHTML = `
-      <button class="back" onclick="currentYear=null;renderPhotos()">
-        ← ${t("Back to Photos","Назад к фотографиям")}
-      </button>
-      <h2>♡ ${currentYear}</h2>
-      <div class="empty">
-        ♡<br>
-        ${t(
-          "This album is waiting for photos.",
-          "Этот альбом ждёт фотографии."
-        )}
-      </div>
-    `;
+    renderAlbum(String(currentYear));
     return;
   }
 
@@ -379,10 +686,7 @@ function renderPhotos() {
     <button class="item" onclick="showLatest()">
       <span>
         <strong>Latest updates</strong><br>
-        <small>${t(
-          "The newest photos first",
-          "Сначала самые новые фотографии"
-        )}</small>
+        <small>${t("The newest photos first","Сначала самые новые фотографии")}</small>
       </span>
       <span class="arrow">›</span>
     </button>
@@ -396,10 +700,7 @@ function renderPhotos() {
   years.forEach(year => {
     const button = document.createElement("button");
     button.className = "item";
-    button.innerHTML = `
-      <strong>${year}</strong>
-      <span class="arrow">›</span>
-    `;
+    button.innerHTML = `<strong>${year}</strong><span class="arrow">›</span>`;
     button.onclick = () => {
       currentYear = year;
       renderPhotos();
@@ -408,40 +709,138 @@ function renderPhotos() {
   });
 }
 
-function showLatest() {
-  currentSection = "photos";
-  currentView = "latest";
+function renderAlbum(album) {
+  currentView = album === "latest" ? "latest" : "year";
+
+  const albumPhotos = photos.filter(photo =>
+    photo.path.startsWith(album + "/")
+  );
 
   content.innerHTML = `
-    <button class="back" onclick="renderPhotos()">
+    <button class="back" onclick="${album === "latest" ? "renderPhotos()" : "currentYear=null;renderPhotos()"}">
       ← ${t("Back to Photos","Назад к фотографиям")}
     </button>
 
-    <h2>♡ ${t("LATEST UPDATES","НОВЫЕ ФОТО")}</h2>
+    <h2>♡ ${album === "latest" ? t("LATEST UPDATES","НОВЫЕ ФОТО") : album}</h2>
+
+    ${isAdmin ? `
+      <div class="admin-panel">
+        <h3>${t("UPLOAD PHOTO","ЗАГРУЗИТЬ ФОТО")}</h3>
+        <input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp,image/gif">
+        <button class="admin-action" onclick="uploadPhoto('${album}')">
+          ＋ ${t("Upload photo","Загрузить фотографию")}
+        </button>
+        <p class="status" id="statusMessage"></p>
+      </div>
+    ` : ""}
+
     <div class="photo-grid" id="photoGrid"></div>
   `;
 
   const grid = document.getElementById("photoGrid");
 
-  photos.forEach(photo => {
+  if (!albumPhotos.length) {
+    grid.innerHTML = `
+      <div class="empty" style="grid-column:1/-1">
+        ♡<br>
+        ${t("This album is waiting for photos.","Этот альбом ждёт фотографии.")}
+      </div>
+    `;
+    return;
+  }
+
+  albumPhotos.forEach(photo => {
     const button = document.createElement("button");
     button.className = "photo-card";
 
     const img = document.createElement("img");
-    img.src = photo.src;
-    img.alt = photo.name;
-
-    const name = document.createElement("span");
-    name.className = "photo-name";
-    name.textContent = photo.name;
+    img.src = photo.url;
+    img.alt = "Taekook photo";
+    img.loading = "lazy";
 
     button.appendChild(img);
-    button.appendChild(name);
-    button.onclick = () => openPhoto(photo.src);
+    button.onclick = () => openPhoto(photo.url);
+
+    if (isAdmin) {
+      const remove = document.createElement("button");
+      remove.className = "photo-delete";
+      remove.textContent = "×";
+      remove.onclick = event => {
+        event.stopPropagation();
+        deletePhoto(photo.path);
+      };
+      button.appendChild(remove);
+    }
 
     grid.appendChild(button);
   });
 }
+
+function showLatest() {
+  currentYear = null;
+  renderAlbum("latest");
+}
+
+/* PHOTO UPLOAD */
+
+async function uploadPhoto(album) {
+  const input = document.getElementById("photoFile");
+  const file = input.files?.[0];
+
+  if (!file) {
+    alert(t("Choose a photo first.","Сначала выбери фотографию."));
+    return;
+  }
+
+  if (file.size > 12 * 1024 * 1024) {
+    alert(t("Maximum file size is 12 MB.","Максимальный размер файла — 12 МБ."));
+    return;
+  }
+
+  const form = new FormData();
+  form.append("action", "upload");
+  form.append("album", album);
+  form.append("file", file);
+
+  setStatus(t("Uploading...","Загрузка..."));
+
+  try {
+    const result = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY,
+        "x-telegram-init-data": tg?.initData || ""
+      },
+      body: form
+    });
+
+    const data = await result.json();
+
+    if (!result.ok) throw new Error(data.error || "Upload failed");
+
+    await loadPhotos();
+    renderAlbum(album);
+  } catch (error) {
+    setStatus(t("Upload failed: ","Ошибка загрузки: ") + error.message);
+  }
+}
+
+/* PHOTO DELETE */
+
+async function deletePhoto(path) {
+  if (!confirm(t("Delete this photo?","Удалить эту фотографию?"))) return;
+
+  try {
+    await api("delete", { path });
+    await loadPhotos();
+    renderAlbum(currentYear === null ? "latest" : String(currentYear));
+  } catch (error) {
+    alert(t("Delete failed: ","Не удалось удалить: ") + error.message);
+  }
+}
+
+/* PHOTO VIEWER */
 
 function openPhoto(src) {
   const viewer = document.getElementById("viewer");
@@ -461,6 +860,40 @@ document.getElementById("viewer").addEventListener("click", function(event) {
   if (event.target === this) closePhoto();
 });
 
+/* ADMIN PANEL */
+
+function toggleAdmin() {
+  if (!isAdmin) return;
+
+  const panel = document.getElementById("adminMainPanel");
+
+  if (panel) {
+    panel.remove();
+    return;
+  }
+
+  const div = document.createElement("div");
+  div.className = "admin-panel";
+  div.id = "adminMainPanel";
+
+  div.innerHTML = `
+    <h3>⚙ ${t("ADMIN PANEL","ПАНЕЛЬ АДМИНИСТРАТОРА")}</h3>
+    <p class="intro">
+      ${t("You can manage the archive here.","Здесь можно управлять архивом.")}
+    </p>
+    <button class="admin-action" onclick="showHome();document.getElementById('adminMainPanel')?.remove()">
+      ${t("Back to site","Вернуться на сайт")}
+    </button>
+    <p class="status">
+      ${t("Choose a section to edit its content. For photos, open Photos.","Выбери раздел, чтобы редактировать его содержимое. Для фотографий открой Фото.")}
+    </p>
+  `;
+
+  content.prepend(div);
+}
+
+/* LANGUAGE */
+
 languageButton.onclick = () => {
   language = language === "en" ? "ru" : "en";
   languageButton.textContent = t("РУССКИЙ","ENGLISH");
@@ -468,11 +901,10 @@ languageButton.onclick = () => {
   if (currentView === "home") showHome();
   else if (currentView === "latest") showLatest();
   else if (currentSection === "photos") renderPhotos();
-  else openSection(currentSection);
+  else renderTextSection(currentSection);
 };
 
-showHome();
-
+initialize();
 </script>
 </body>
 </html>
