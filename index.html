@@ -5,63 +5,103 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TAEKOOK MOMENTS ♡</title>
+
 <style>
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
   background: #10090d;
   color: #f8edf1;
   font-family: Georgia, serif;
 }
+
 header {
   text-align: center;
-  padding: 35px 18px 24px;
+  padding: 35px 18px 25px;
   background: linear-gradient(145deg, #35101f, #160b12);
   border-bottom: 1px solid #59283b;
 }
-h1 { font-size: 27px; letter-spacing: 3px; margin: 8px 0; }
-.subtitle { color: #c69aaa; font-size: 12px; letter-spacing: 2px; }
+
+h1 {
+  font-size: 27px;
+  letter-spacing: 3px;
+  margin: 10px 0;
+}
+
+.subtitle {
+  color: #c69aaa;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
 .language {
   margin-top: 18px;
   background: transparent;
   border: 1px solid #a45b78;
   color: #f8edf1;
   border-radius: 20px;
-  padding: 7px 16px;
+  padding: 8px 17px;
 }
-nav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  padding: 16px 10px;
-  background: #180d13;
-  border-bottom: 1px solid #42202e;
-}
-nav button {
-  background: #28121d;
-  color: #e8cbd6;
-  border: 1px solid #583044;
-  border-radius: 20px;
-  padding: 9px 13px;
-  font-size: 12px;
-}
-nav button.active, nav button:hover {
-  background: #71364e;
-  color: white;
-}
+
 main {
   max-width: 620px;
   margin: auto;
   padding: 25px 18px 55px;
 }
+
 h2 {
   color: #e8b9cb;
   font-size: 21px;
   letter-spacing: 2px;
   margin: 8px 0 20px;
 }
-.intro { color: #bda5af; line-height: 1.6; font-size: 14px; }
+
+.intro {
+  color: #bda5af;
+  line-height: 1.7;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* MAIN MENU */
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.menu-card {
+  min-height: 125px;
+  background: linear-gradient(145deg, #351a28, #1c1017);
+  border: 1px solid #704057;
+  border-radius: 14px;
+  color: #f5e5eb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: Georgia, serif;
+  font-size: 15px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.menu-card:active {
+  background: #71364e;
+  transform: scale(0.97);
+}
+
+.menu-icon {
+  font-size: 27px;
+}
+
+/* ARCHIVE */
+
 .item {
   display: flex;
   align-items: center;
@@ -78,8 +118,14 @@ h2 {
   font-size: 16px;
   cursor: pointer;
 }
-.item small { color: #b68b9d; font-size: 11px; }
-.item .arrow { color: #c58aa1; }
+
+.item small {
+  color: #b68b9d;
+  font-size: 11px;
+}
+
+.arrow { color: #c58aa1; }
+
 .back {
   background: transparent;
   border: 0;
@@ -88,22 +134,26 @@ h2 {
   font-size: 14px;
   cursor: pointer;
 }
+
 .empty {
   text-align: center;
   padding: 38px 18px;
   border: 1px dashed #63364a;
   border-radius: 12px;
   color: #bda5af;
-  line-height: 1.7;
+  line-height: 1.8;
 }
+
 footer {
   text-align: center;
   color: #80596a;
   font-size: 11px;
   padding: 20px;
 }
+
 </style>
 </head>
+
 <body>
 
 <header>
@@ -113,129 +163,187 @@ footer {
   <button class="language" id="languageButton">РУССКИЙ</button>
 </header>
 
-<nav id="navigation"></nav>
 <main id="content"></main>
+
 <footer>MADE WITH LOVE ♡ TAEKOOK MOMENTS</footer>
 
 <script>
+
 const sections = [
-  ["photos","Photos","Фото"],
-  ["videos","Videos","Видео"],
-  ["moments","Moments","Моменты"],
-  ["timeline","Timeline","Хронология"],
-  ["edits","Edits","Эдиты"],
-  ["news","News","Новости"],
-  ["favorites","Favorites","Избранное"],
-  ["about","About","О проекте"]
+  {id:"photos", en:"Photos", ru:"Фото", icon:"📸"},
+  {id:"videos", en:"Videos", ru:"Видео", icon:"🎬"},
+  {id:"moments", en:"Moments", ru:"Моменты", icon:"♡"},
+  {id:"timeline", en:"Timeline", ru:"Хронология", icon:"⌛"},
+  {id:"edits", en:"Edits", ru:"Эдиты", icon:"✦"},
+  {id:"news", en:"News", ru:"Новости", icon:"📰"},
+  {id:"favorites", en:"Favorites", ru:"Избранное", icon:"♡"},
+  {id:"about", en:"About", ru:"О проекте", icon:"☾"}
 ];
 
 const years = [];
 for (let y = 2026; y >= 2013; y--) years.push(y);
 
 let language = "en";
-let currentSection = "photos";
+let currentSection = "home";
 let currentYear = null;
 
 const content = document.getElementById("content");
-const navigation = document.getElementById("navigation");
 const languageButton = document.getElementById("languageButton");
 
 function t(en, ru) {
   return language === "en" ? en : ru;
 }
 
-function renderNavigation() {
-  navigation.innerHTML = "";
-  sections.forEach(([id,en,ru]) => {
+function showHome() {
+  currentSection = "home";
+  currentYear = null;
+
+  content.innerHTML = `
+    <h2 style="text-align:center">♡ ${t("WELCOME","ДОБРО ПОЖАЛОВАТЬ")} ♡</h2>
+    <p class="intro">
+      ${t(
+        "A little place for memories, photos and special moments.",
+        "Место для фотографий, воспоминаний и особенных моментов."
+      )}
+    </p>
+    <div class="menu-grid" id="menuGrid"></div>
+  `;
+
+  const grid = document.getElementById("menuGrid");
+
+  sections.forEach(section => {
     const button = document.createElement("button");
-    button.textContent = t(en,ru);
-    button.className = currentSection === id ? "active" : "";
-    button.onclick = () => {
-      currentSection = id;
-      currentYear = null;
-      render();
-    };
-    navigation.appendChild(button);
+    button.className = "menu-card";
+    button.innerHTML = `
+      <span class="menu-icon">${section.icon}</span>
+      <span>${t(section.en, section.ru)}</span>
+    `;
+    button.onclick = () => openSection(section.id);
+    grid.appendChild(button);
   });
 }
 
-function openYear(year) {
-  currentYear = year;
-  render();
+function openSection(id) {
+  currentSection = id;
+  currentYear = null;
+
+  if (id === "photos") {
+    renderPhotos();
+    return;
+  }
+
+  const section = sections.find(s => s.id === id);
+
+  content.innerHTML = `
+    <button class="back" onclick="showHome()">
+      ← ${t("Main menu","Главное меню")}
+    </button>
+    <h2>♡ ${t(section.en, section.ru).toUpperCase()}</h2>
+    <div class="empty">
+      ♡<br>
+      ${t(
+        "This section is waiting for content.",
+        "Этот раздел ждёт наполнения."
+      )}
+    </div>
+  `;
 }
 
 function renderPhotos() {
   if (currentYear !== null) {
     content.innerHTML = `
-      <button class="back" onclick="currentYear=null;render()">
+      <button class="back" onclick="currentYear=null;renderPhotos()">
         ← ${t("Back to Photos","Назад к фотографиям")}
       </button>
-      <h2>${currentYear}</h2>
+      <h2>♡ ${currentYear}</h2>
       <div class="empty">
         ♡<br>
-        ${t("This album is waiting for photos.","Этот альбом ждёт фотографии.")}<br>
-        <small>${t("Photos will appear here when added.","Здесь появятся добавленные фотографии.")}</small>
-      </div>`;
+        ${t(
+          "This album is waiting for photos.",
+          "Этот альбом ждёт фотографии."
+        )}<br>
+        <small>${t(
+          "Photos will appear here when added.",
+          "Здесь появятся добавленные фотографии."
+        )}</small>
+      </div>
+    `;
     return;
   }
 
   content.innerHTML = `
+    <button class="back" onclick="showHome()">
+      ← ${t("Main menu","Главное меню")}
+    </button>
+
     <h2>♡ ${t("PHOTOS","ФОТОГРАФИИ")}</h2>
+
     <button class="item" onclick="showLatest()">
       <span>
         <strong>Latest updates</strong><br>
-        <small>${t("The newest photos first","Сначала самые новые фотографии")}</small>
+        <small>${t(
+          "The newest photos first",
+          "Сначала самые новые фотографии"
+        )}</small>
       </span>
       <span class="arrow">›</span>
     </button>
+
     <h2 style="margin-top:30px">${t("ARCHIVE","АРХИВ")}</h2>
-    <div id="yearList"></div>`;
+
+    <div id="yearList"></div>
+  `;
 
   const yearList = document.getElementById("yearList");
+
   years.forEach(year => {
     const button = document.createElement("button");
     button.className = "item";
-    button.innerHTML = `<strong>${year}</strong><span class="arrow">›</span>`;
-    button.onclick = () => openYear(year);
+    button.innerHTML = `
+      <strong>${year}</strong>
+      <span class="arrow">›</span>
+    `;
+    button.onclick = () => {
+      currentYear = year;
+      renderPhotos();
+    };
     yearList.appendChild(button);
   });
 }
 
 function showLatest() {
   content.innerHTML = `
-    <button class="back" onclick="render()">← ${t("Back to Photos","Назад к фотографиям")}</button>
+    <button class="back" onclick="renderPhotos()">
+      ← ${t("Back to Photos","Назад к фотографиям")}
+    </button>
+
     <h2>♡ Latest updates</h2>
+
     <div class="empty">
       ♡<br>
-      ${t("The latest photos will appear here.","Здесь будут самые новые фотографии.")}<br>
-      <small>${t("Nothing has been added yet.","Пока фотографии не добавлены.")}</small>
-    </div>`;
-}
-
-function renderOtherSection() {
-  const section = sections.find(s => s[0] === currentSection);
-  content.innerHTML = `
-    <h2>♡ ${t(section[1],section[2]).toUpperCase()}</h2>
-    <div class="empty">
-      ♡<br>
-      ${t("This section is coming soon.","Этот раздел скоро появится.")}<br>
-      <small>${t("Stay tuned for updates.","Следи за обновлениями.")}</small>
-    </div>`;
-}
-
-function render() {
-  renderNavigation();
-  if (currentSection === "photos") renderPhotos();
-  else renderOtherSection();
+      ${t(
+        "The latest photos will appear here.",
+        "Здесь будут самые новые фотографии."
+      )}<br>
+      <small>${t(
+        "Nothing has been added yet.",
+        "Пока фотографии не добавлены."
+      )}</small>
+    </div>
+  `;
 }
 
 languageButton.onclick = () => {
   language = language === "en" ? "ru" : "en";
   languageButton.textContent = t("РУССКИЙ","ENGLISH");
-  render();
+
+  if (currentSection === "home") showHome();
+  else if (currentSection === "photos") renderPhotos();
+  else openSection(currentSection);
 };
 
-render();
+showHome();
+
 </script>
 </body>
 </html>
