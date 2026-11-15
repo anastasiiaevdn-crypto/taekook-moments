@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAEKOOK MOMENTS ♡</title>
+<style>
+* {box-sizing:border-box}
+body {
+ margin:0;
+ background:#100d10;
+ color:#f1e5e9;
+ font-family:Arial,sans-serif;
+}
+header {
+ text-align:center;
+ padding:35px 15px;
+ background:linear-gradient(145deg,#321a27,#100d10);
+ border-bottom:1px solid #593747;
+}
+h1 {letter-spacing:3px;color:#e6b9ca}
+.subtitle {color:#bd9eac;font-size:12px;letter-spacing:2px}
+main {padding:22px;max-width:600px;margin:auto}
+h2 {font-size:17px;color:#e6b9ca}
+.grid {
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:12px;
+}
+.card {
+ background:#241820;
+ border:1px solid #503343;
+ border-radius:13px;
+ padding:23px 10px;
+ text-align:center;
+ cursor:pointer;
+ color:#f1e5e9;
+}
+.card span {display:block;font-size:29px;margin-bottom:10px}
+.card:active {background:#49303e}
+button {
+ background:#49303e;
+ border:1px solid #795267;
+ color:white;
+ padding:12px 18px;
+ border-radius:20px;
+ cursor:pointer;
+}
+#content {display:none}
+#content p {line-height:1.7;color:#cbb9c1}
+footer {text-align:center;padding:25px;color:#a98c9b;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>TAEKOOK MOMENTS ♡</h1>
+<div class="subtitle">YOUR TAEKOOK ARCHIVE</div>
+</header>
+
+<main>
+<div id="home">
+<h2 id="welcome">Welcome ♡ Choose a section</h2>
+<div class="grid" id="menu"></div>
+</div>
+
+<div id="content">
+<button onclick="home()">← Back</button>
+<h2 id="sectionTitle"></h2>
+<p id="description"></p>
+<div id="links"></div>
+</div>
+</main>
+
+<footer>TAEKOOK MOMENTS ♡</footer>
+
+<script>
+let lang="en";
+const sections=[
+["📸","Photos","Фото"],
+["🎬","Videos","Видео"],
+["💗","Moments","Моменты"],
+["🗓️","Timeline","Хронология"],
+["🎞️","Edits","Эдиты"],
+["📰","News","Новости"],
+["⭐","Favorites","Избранное"],
+["ℹ️","About","О боте"]
+];
+
+function render(){
+document.getElementById("welcome").textContent=
+lang==="en"?"Welcome ♡ Choose a section":"Добро пожаловать ♡ Выбери раздел";
+document.getElementById("menu").innerHTML="";
+sections.forEach((s,i)=>{
+let b=document.createElement("button");
+b.className="card";
+b.innerHTML="<span>"+s[0]+"</span>"+s[lang==="en"?1:2];
+b.onclick=()=>openSection(i);
+document.getElementById("menu").appendChild(b);
+});
+let l=document.createElement("button");
+l.textContent=lang==="en"?"🇷🇺 Русский":"🇬🇧 English";
+l.style.marginTop="20px";
+l.onclick=()=>{lang=lang==="en"?"ru":"en";render()};
+document.getElementById("menu").appendChild(l);
+}
+function openSection(i){
+document.getElementById("home").style.display="none";
+document.getElementById("content").style.display="block";
+document.getElementById("sectionTitle").textContent=
+sections[i][0]+" "+sections[i][lang==="en"?1:2];
+document.getElementById("description").textContent=
+lang==="en"?"This section will contain your materials ♡":"Здесь будут твои материалы ♡";
+document.getElementById("links").innerHTML="";
+}
+function home(){
+document.getElementById("content").style.display="none";
+document.getElementById("home").style.display="block";
+}
+render();
+</script>
+</body>
+</html>
