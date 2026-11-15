@@ -865,31 +865,46 @@ document.getElementById("viewer").addEventListener("click", function(event) {
 function toggleAdmin() {
   if (!isAdmin) return;
 
-  const panel = document.getElementById("adminMainPanel");
+  let panel = document.getElementById("adminMainPanel");
 
   if (panel) {
     panel.remove();
     return;
   }
 
-  const div = document.createElement("div");
-  div.className = "admin-panel";
-  div.id = "adminMainPanel";
+  panel = document.createElement("div");
+  panel.id = "adminMainPanel";
+  panel.className = "admin-panel";
 
-  div.innerHTML = `
+  panel.style.display = "block";
+  panel.style.position = "fixed";
+  panel.style.left = "15px";
+  panel.style.right = "15px";
+  panel.style.bottom = "82px";
+  panel.style.zIndex = "950";
+  panel.style.maxHeight = "70vh";
+  panel.style.overflowY = "auto";
+  panel.style.boxShadow = "0 5px 25px #000";
+
+  panel.innerHTML = `
     <h3>⚙ ${t("ADMIN PANEL","ПАНЕЛЬ АДМИНИСТРАТОРА")}</h3>
-    <p class="intro">
-      ${t("You can manage the archive here.","Здесь можно управлять архивом.")}
-    </p>
-    <button class="admin-action" onclick="showHome();document.getElementById('adminMainPanel')?.remove()">
-      ${t("Back to site","Вернуться на сайт")}
-    </button>
     <p class="status">
-      ${t("Choose a section to edit its content. For photos, open Photos.","Выбери раздел, чтобы редактировать его содержимое. Для фотографий открой Фото.")}
+      ${t("Choose what you want to edit:","Выбери, что хочешь изменить:")}
     </p>
+    <button class="admin-action" onclick="openSection('photos');document.getElementById('adminMainPanel')?.remove()">
+      📸 ${t("Manage photos","Управление фото")}
+    </button>
+    ${sections.filter(s => s.id !== "photos").map(s => `
+      <button class="admin-action" onclick="openSection('${s.id}');document.getElementById('adminMainPanel')?.remove()">
+        ${s.icon} ${t(s.en,s.ru)}
+      </button>
+    `).join("")}
+    <button class="admin-action admin-secondary" onclick="document.getElementById('adminMainPanel')?.remove()">
+      ✕ ${t("Close","Закрыть")}
+    </button>
   `;
 
-  content.prepend(div);
+  document.body.appendChild(panel);
 }
 
 /* LANGUAGE */
